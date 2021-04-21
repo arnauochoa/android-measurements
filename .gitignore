@@ -1,0 +1,8 @@
+# Ignore cached files
+fcache/
+
+# Ignore MATLAB auto-save files
+*.asv
+*m~
+
+
