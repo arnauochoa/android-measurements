@@ -7,7 +7,7 @@ classdef GnssLogUtils < handle
     %     Author: Arnau Ochoa Banuelos (CS Group), March 2021
     
     %% Properties
-    properties (Constant)        
+    properties (Constant)
         % Frequency bands
         GPS_BANDNAMES = {'L1' 'L5'};
         GPS_FREQUENCIES = [1575.42e6 1176.45e6];

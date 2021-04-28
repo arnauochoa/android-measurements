@@ -259,7 +259,7 @@ function [obs, obsType] = packObservations(wNumVec, towVec, gnssRaw, prMeasVec, 
                     svnInd = find(isConstInd & gnssRaw.Svid == svn);
                     svnInd = GnssLogUtils.sortIndices(svnInd, gnssRaw.CarrierFrequencyHz(svnInd), const);      
                     for iMeas = svnInd'
-                        % First frequency band (4 columns)
+                        % First frequency band (8 columns)
                         if  gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.GPS_FREQUENCIES(1) || ...
                             gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.BDS_FREQUENCIES(1) || ...
                             gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.GAL_FREQUENCIES(1)
@@ -271,18 +271,18 @@ function [obs, obsType] = packObservations(wNumVec, towVec, gnssRaw, prMeasVec, 
                                 obs(iObs, GnssLogUtils.COL_U1L) = carrierSigmaCycVec(iMeas);
                                 obs(iObs, GnssLogUtils.COL_U1D) = dopplerSigmaHzVec(iMeas);
                                 obs(iObs, GnssLogUtils.COL_L1L) = lliBitVec(iMeas);
-                        % Second frequency band (4 columns)
+                        % Second frequency band (8 columns)
                         elseif  gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.GPS_FREQUENCIES(2) || ...
-                            gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.BDS_FREQUENCIES(2) || ...
-                            gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.GAL_FREQUENCIES(2)
-                                obs(iObs, GnssLogUtils.COL_C2) = prMeasVec(iMeas);
-                                obs(iObs, GnssLogUtils.COL_L2) = carrierMeasVec(iMeas);
-                                obs(iObs, GnssLogUtils.COL_D2) = doppMeasVec(iMeas);
-                                obs(iObs, GnssLogUtils.COL_S2) = gnssRaw.Cn0DbHz(iMeas);
-                                obs(iObs, GnssLogUtils.COL_U2C) = prSigmaMetersVec(iMeas);
-                                obs(iObs, GnssLogUtils.COL_U2L) = carrierSigmaCycVec(iMeas);
-                                obs(iObs, GnssLogUtils.COL_U2D) = dopplerSigmaHzVec(iMeas);
-                                obs(iObs, GnssLogUtils.COL_L2L) = lliBitVec(iMeas);
+                                gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.BDS_FREQUENCIES(2) || ...
+                                gnssRaw.CarrierFrequencyHz(iMeas) == GnssLogUtils.GAL_FREQUENCIES(2)
+                                    obs(iObs, GnssLogUtils.COL_C2) = prMeasVec(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_L2) = carrierMeasVec(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_D2) = doppMeasVec(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_S2) = gnssRaw.Cn0DbHz(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_U2C) = prSigmaMetersVec(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_U2L) = carrierSigmaCycVec(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_U2D) = dopplerSigmaHzVec(iMeas);
+                                    obs(iObs, GnssLogUtils.COL_L2L) = lliBitVec(iMeas);
                         end
                     end
                 end

@@ -6,7 +6,7 @@ LIGHTSPEED = 299792458;
 
 %% Configuration
 % Measurement campaign name
-campaignName = '2020-08-06-US-MTV-2'; % '2020-06-05-US-MTV-1'; '2020-08-06-US-MTV-2';
+campaignName = '2020-09-04-US-SF-1'; % '2020-06-05-US-MTV-1'; '2020-08-06-US-MTV-2';
 % Phone name
 phoneName = 'Mi8';
 % Filter flag: set to 1 to apply filters to measurements
@@ -32,11 +32,11 @@ end
 % end
 
 %% Read derived data (from GNSS Analysis)
-Derived = readDerivedData(dirName, derivedFileName);
+% Derived = readDerivedData(dirName, derivedFileName);
 
 %% Read RINEX
-disp('Reading RINEX file...');
-[obs_rinex,obs_rinex_type] = rinex_v3_obs_parser(rinexFilePath);
+% disp('Reading RINEX file...');
+% [obs_rinex,obs_rinex_type] = rinex_v3_obs_parser(rinexFilePath);
 
 %% Read Android Raw Log
 if ~exist('gnssRaw', 'var')
@@ -48,6 +48,19 @@ end
 %% Process Android GNSS raw measurements
 [obs, obsType] = processGnssRaw(gnssRaw, filter);
 
+%% Plot IMU + Mag
+figure; plot(accRaw.utcTimeMillis, [accRaw.UncalAccelXMps2 accRaw.UncalAccelYMps2 accRaw.UncalAccelZMps2], '.'); 
+xlabel('Time (ms)'); ylabel('Acceleration (m/s²)');
+legend('X', 'Y', 'Z'); title('Acc')
+figure; plot(gyrRaw.utcTimeMillis, [gyrRaw.UncalGyroXRadPerSec gyrRaw.UncalGyroYRadPerSec gyrRaw.UncalGyroZRadPerSec], '.'); 
+legend('X', 'Y', 'Z'); title('Gyr')
+xlabel('Time (ms)'); ylabel('Ang. vel. (rad/s)');
+figure; plot(magRaw.utcTimeMillis, [magRaw.UncalMagXMicroT magRaw.UncalMagYMicroT magRaw.UncalMagZMicroT], '.'); 
+legend('X', 'Y', 'Z'); title('Mag')
+xlabel('Time (ms)'); ylabel('Mag. field (uT)');
+
+%% Filter
+return
 if ~filter
     isInvalid = obs(:, GnssLogUtils.COL_C1) > 50e6 | ...
                 obs(:, GnssLogUtils.COL_C1) < -5e6 | ...
@@ -110,26 +123,27 @@ nObsRnx = size(obs_rinex, 1);
 % difPrGal = []; noObsGal = []; nGal = 0;
 % difPrBds = []; noObsBds = []; nBds = 0;
 
-obsRnxConst = obs_rinex(indRnxGps, :); % indRnxGps
-svns = unique(obsRnxConst(:, 4));
+obsRnxConst = obs_rinex(indRnxGal, :); % indRnxGps
+% svns = unique(obsRnxConst(:, 4));
 
-obsLogConst = obs(isGpsIdx, :); % isGpsIdx
+obsLogConst = obs(isGalIdx, :); % isGpsIdx
+svns = unique(obsLogConst(:, 4));
 
-indDerConst = Derived.MEAS.ConstellationType == GnssLogUtils.ID_GPS;
+indDerConst = Derived.MEAS.ConstellationType == GnssLogUtils.ID_GAL;
 obsDerConst = Derived.MEAS(indDerConst, :);
 
-selFreq = GnssLogUtils.GPS_FREQUENCIES(1);
+selFreq = GnssLogUtils.GPS_FREQUENCIES(2);
 
 obsName = 'C'; % C L D S
 
 switch obsName
-    case 'C', colRnx = GnssLogUtils.COL_C1; units = '(m)';
-        obsDerAll = obsDerConst.RawPrM;
-    case 'L', colRnx = GnssLogUtils.COL_L1; units = '(cyc)';
+    case 'C', colRnx = GnssLogUtils.COL_C2; units = '(m)';
+        obsDerAll = obsDerConst.SmPrM;
+    case 'L', colRnx = GnssLogUtils.COL_L2; units = '(cyc)';
         obsDerAll = obsDerConst.AdrM .* obsDerConst.CarrierFrequencyHz / LIGHTSPEED;
-    case 'D', colRnx = GnssLogUtils.COL_D1; units = '(Hz)';
+    case 'D', colRnx = GnssLogUtils.COL_D2; units = '(Hz)';
         obsDerAll = -obsDerConst.PrrMps .* obsDerConst.CarrierFrequencyHz / LIGHTSPEED;
-    case 'S', colRnx = GnssLogUtils.COL_S1; units = '(dBHz)';
+    case 'S', colRnx = GnssLogUtils.COL_S2; units = '(dBHz)';
         obsDerAll = obsDerConst.Cn0DbHz;
 end
 
@@ -153,15 +167,16 @@ for iSvn = 1:length(svns)
     
     if ~all(isnan(obsRnx)) && ~isempty(obsLog)
         % Obs comparison
-%         figure;
-%         hold on;
-%         plot(towRnx, obsRnx, '.');
-%         plot(timeSecDer, obsDer, '.');
-%         plot(towLog, obsLog, '.');
-%         xlabel('TOW (s)'); ylabel([obsName units]);
-%         legend('RINEX', 'GnssAnalysis', 'GnssLog');
-%         title(sprintf('SVN: %s', string(svns(iSvn))))
-%         hold off;
+        figure;
+        hold on;
+        plot(towRnx, obsRnx, '.');
+        plot(timeSecDer, obsDer, '.');
+        plot(towLog, obsLog, '.');
+        xlabel('TOW (s)'); ylabel([obsName units]);
+        legend('RINEX', 'GnssAnalysis', 'GnssLog');
+%         legend('GnssAnalysis', 'GnssLog');
+        title(sprintf('SVN: %s', string(svns(iSvn))))
+        hold off;
         
         % Obs difference
         indMeasRnx = ~isnan(obsRnx);
@@ -197,38 +212,38 @@ for iSvn = 1:length(svns)
 %         xlabel([obsName ' ' units]);
 %         title(sprintf('Error wrt GnssAnalysis SVN: %s', string(svns(iSvn))))
         
-        % CMC
-        cmcRinex = obsRnxConst(indRnxSvn, GnssLogUtils.COL_C1) - ...
-            obsRnxConst(indRnxSvn, GnssLogUtils.COL_L1) * LIGHTSPEED / GnssLogUtils.GPS_FREQUENCIES(1);
-        cmcGnssLog = obsLogConst(indObsSvn, GnssLogUtils.COL_C1) - ...
-            obsLogConst(indObsSvn, GnssLogUtils.COL_L1) * LIGHTSPEED / GnssLogUtils.GPS_FREQUENCIES(1);
-        
-        cmcRinex = cmcRinex - mean(cmcRinex, 'omitnan'); % Remove ambiguity
-        cmcGnssLog = cmcGnssLog - mean(cmcGnssLog, 'omitnan'); % Remove ambiguity
-        
-        % Remove very large uncertainties
-        indLarge = obsLogConst(:, GnssLogUtils.COL_U1L) > 1e30;
-        obsLogConst(indLarge, GnssLogUtils.COL_U1L) = 1;
-        
-        figure; hold on;
-%         plot(towRnx, cmcRinex, 'b.');
-        subplot(2,1,1)
-        plot(towLog, cmcGnssLog, 'r.');
-        xlabel('TOW'); ylabel('CMC (m)');
-        %         legend('GnssLog');
-%         legend('RINEX', 'GnssLog');
-        title(sprintf('SVN: %s', string(svns(iSvn))))
+%         % CMC
+%         cmcRinex = obsRnxConst(indRnxSvn, GnssLogUtils.COL_C1) - ...
+%             obsRnxConst(indRnxSvn, GnssLogUtils.COL_L1) * LIGHTSPEED / GnssLogUtils.GPS_FREQUENCIES(1);
+%         cmcGnssLog = obsLogConst(indObsSvn, GnssLogUtils.COL_C1) - ...
+%             obsLogConst(indObsSvn, GnssLogUtils.COL_L1) * LIGHTSPEED / GnssLogUtils.GPS_FREQUENCIES(1);
+%         
+%         cmcRinex = cmcRinex - mean(cmcRinex, 'omitnan'); % Remove ambiguity
+%         cmcGnssLog = cmcGnssLog - mean(cmcGnssLog, 'omitnan'); % Remove ambiguity
+%         
+%         % Remove very large uncertainties
+%         indLarge = obsLogConst(:, GnssLogUtils.COL_U1L) > 1e30;
+%         obsLogConst(indLarge, GnssLogUtils.COL_U1L) = 1;
+%         
+%         figure; hold on;
+% %         plot(towRnx, cmcRinex, 'b.');
+%         subplot(2,1,1)
+%         plot(towLog, cmcGnssLog, 'r.');
+%         xlabel('TOW'); ylabel('CMC (m)');
+%         %         legend('GnssLog');
+% %         legend('RINEX', 'GnssLog');
+%         title(sprintf('SVN: %s', string(svns(iSvn))))
+% %         subplot(2,1,2)
+% % %         plot(towLog, 10*log10(obsLogConst(indObsSvn, GnssLogUtils.COL_U1L)), '.')
+% %         semilogy(towLog, obsLogConst(indObsSvn, GnssLogUtils.COL_U1L), '.')
+% %         grid on
+% %         xlabel('TOW'); ylabel('\sigma_L (cyc)');
 %         subplot(2,1,2)
-% %         plot(towLog, 10*log10(obsLogConst(indObsSvn, GnssLogUtils.COL_U1L)), '.')
-%         semilogy(towLog, obsLogConst(indObsSvn, GnssLogUtils.COL_U1L), '.')
+%         plot(towLog, obsLogConst(indObsSvn, GnssLogUtils.COL_L1L), '.')
+%         ylim([-0.5 1.5])
 %         grid on
-%         xlabel('TOW'); ylabel('\sigma_L (cyc)');
-        subplot(2,1,2)
-        plot(towLog, obsLogConst(indObsSvn, GnssLogUtils.COL_L1L), '.')
-        ylim([-0.5 1.5])
-        grid on
-        xlabel('TOW'); ylabel('LLI');
-        saveas(gcf, ['figs/' campaignName '/' phoneName '/cmc/lli_' num2str(svns(iSvn))], 'png');
+%         xlabel('TOW'); ylabel('LLI');
+%         saveas(gcf, ['figs/' campaignName '/' phoneName '/cmc/lli_' num2str(svns(iSvn))], 'png');
     end
 end
 
