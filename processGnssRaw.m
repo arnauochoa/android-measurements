@@ -1,4 +1,4 @@
-function [obs, obsType] = processGnssRaw(gnssRaw, filter)
+function [obs, obsType, obsUtcMillis] = processGnssRaw(gnssRaw, filter)
 % PROCESSGNSSRAW computes the RINEX observations from Android GNSS raw measurements
 %
 %   [obs, obsType] = PROCESSGNSSRAW(gnssRaw, filter)
@@ -107,7 +107,7 @@ lliBit(isAdrHCS) = nansum([lliBit(isAdrHCS) GnssLogUtils.LLI_HALFCYCLE*ones(size
 wNum = floor(-double(gnssRaw.FullBiasNanos)/GnssLogUtils.NUMBER_NANOSECONDS_WEEK);
 tow = double(mod(tRxRefNanos, GnssLogUtils.NUMBER_NANOSECONDS_WEEK))*1e-9;
 
-[obs, obsType] = packObservations(wNum, tow, gnssRaw, prMeas, carrierMeasCyc, ...
+[obs, obsType, obsUtcMillis] = packObservations(wNum, tow, gnssRaw, prMeas, carrierMeasCyc, ...
                     doppMeasHz, prSigmaMeters, carrierSigmaCyc, dopplerSigmaHz, lliBit);
 
 end %end of function processGnssRaw
@@ -224,12 +224,13 @@ function gnssRaw = filterRawMeas(gnssRaw, filter)
 end %end of function filterRawMeas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [obs, obsType] = packObservations(wNumVec, towVec, gnssRaw, prMeasVec, carrierMeasVec, ...
+function [obs, obsType, obsUtcMillis] = packObservations(wNumVec, towVec, gnssRaw, prMeasVec, carrierMeasVec, ...
     doppMeasVec, prSigmaMetersVec, carrierSigmaCycVec, dopplerSigmaHzVec, lliBitVec)
 
     % Number of observations: unique combinations of wnum, tow, const and svid
     nObs = length(unique([wNumVec towVec gnssRaw.ConstellationType gnssRaw.Svid], 'stable', 'rows'));
     obs = nan(nObs, GnssLogUtils.COL_MAX);
+    obsUtcMillis = nan(nObs, 1);
     iObs = 0;
     
     wNumUnique = unique(wNumVec);
@@ -254,6 +255,8 @@ function [obs, obsType] = packObservations(wNumVec, towVec, gnssRaw, prMeasVec, 
                     obs(iObs, GnssLogUtils.COL_TOW) = tow;
                     obs(iObs, GnssLogUtils.COL_CONST) = GnssLogUtils.getIdObsConst(const);
                     obs(iObs, GnssLogUtils.COL_SVN) = svn;
+                    thisUtcInd = find(isConstInd, 1, 'first');
+                    obsUtcMillis(iObs) = gnssRaw.utcTimeMillis(thisUtcInd);
                     
                     % Indices of current svn & const & TOW & wNum
                     svnInd = find(isConstInd & gnssRaw.Svid == svn);

@@ -8,7 +8,7 @@ LIGHTSPEED = 299792458;
 % Measurement campaign name
 campaignName = '2020-09-04-US-SF-1'; % '2020-06-05-US-MTV-1'; '2020-08-06-US-MTV-2';
 % Phone name
-phoneName = 'Mi8';
+phoneName = 'Pixel4';
 % Filter flag: set to 1 to apply filters to measurements
 filter = 1;
 
@@ -58,6 +58,44 @@ xlabel('Time (ms)'); ylabel('Ang. vel. (rad/s)');
 figure; plot(magRaw.utcTimeMillis, [magRaw.UncalMagXMicroT magRaw.UncalMagYMicroT magRaw.UncalMagZMicroT], '.'); 
 legend('X', 'Y', 'Z'); title('Mag')
 xlabel('Time (ms)'); ylabel('Mag. field (uT)');
+
+figure; plot(accRaw.utcTimeMillis-accRaw.utcTimeMillis(1), ~isnan(accRaw.UncalAccelXMps2), '.', 'MarkerSize', 5)
+hold on
+plot(gyrRaw.utcTimeMillis-accRaw.utcTimeMillis(1), 1*(~isnan(gyrRaw.UncalGyroXRadPerSec)), '.', 'MarkerSize', 5)
+plot(magRaw.utcTimeMillis-accRaw.utcTimeMillis(1), 1*(~isnan(magRaw.UncalMagXMicroT)), '.', 'MarkerSize', 5)
+legend('Acc', 'Gyr', 'Mag');
+
+dtAcc = diff(accRaw.utcTimeMillis);
+[~, i] = max(dtAcc); dtAcc(i) = [];
+dtGyr = diff(gyrRaw.utcTimeMillis);
+[~, i] = max(dtGyr); dtGyr(i) = [];
+dtMag = diff(magRaw.utcTimeMillis);
+[~, i] = max(dtMag); dtMag(i) = [];
+
+figure; histogram(dtAcc); xlabel('Acc dt (ms)');
+figure; histogram(dtGyr); xlabel('Gyr dt (ms)');
+figure; histogram(dtGyr); xlabel('Mag dt (ms)');
+
+figure; plot((accRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, ~isnan(accRaw.UncalAccelXMps2), '|', 'MarkerSize', 50,'LineWidth',2)
+hold on
+plot((gyrRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, 1*(~isnan(gyrRaw.UncalGyroXRadPerSec)), '|', 'MarkerSize', 50,'LineWidth',2)
+plot((magRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, 1*(~isnan(magRaw.UncalMagXMicroT)), '|', 'MarkerSize', 50,'LineWidth',2)
+legend('Acc', 'Gyr', 'Mag');
+xlabel('Time from start (ms)')
+grid on;
+
+dtAcc = diff(accRaw.elapsedRealtimeNanos);
+[~, i] = max(dtAcc); dtAcc(i) = [];
+dtGyr = diff(gyrRaw.elapsedRealtimeNanos);
+[~, i] = max(dtGyr); dtGyr(i) = [];
+dtMag = diff(magRaw.elapsedRealtimeNanos);
+[~, i] = max(dtMag); dtMag(i) = [];
+
+figure; histogram(dtAcc); xlabel('Acc chipset dt (ns)');
+figure; histogram(dtGyr); xlabel('Gyr chipset dt (ns)');
+figure; histogram(dtGyr); xlabel('Mag chipset dt (ns)');
+
+
 
 %% Filter
 return

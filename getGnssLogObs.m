@@ -28,7 +28,6 @@ function [obsRinex, obsRinexType, obsRinexUtcMillis, gnssAnalysis, accMeas, gyrM
 % Author: Arnau Ochoa Banuelos (CS Group), April 2021
 
 inputSignature = DataHash([dirname filename], 'file');
-
 if Fcache.hasValidCacheFile(mfilename, inputSignature)
     disp('Loading Android raw measurements...');
     cache = Fcache.get(mfilename, inputSignature);
@@ -49,11 +48,12 @@ end
 disp('Reading Android raw measurements...');
 [gnssMeas, gnssAnalysis, accMeas, gyrMeas, magMeas, sensorAnalysis] = readGnssLog(dirname, filename);
 disp('Processing Android GNSS raw measurements...');
-[obsRinex, obsRinexType] = processGnssRaw(gnssMeas, filter);
-obsRinexUtcMillis = unique(gnssMeas.utcTimeMillis);
-if length(obsRinexUtcMillis) ~= length(unique(obsRinex(:, 2)))
-    warning('obsRinexUtcTimeMillis does not have the same number of epochs as obsRinex');
-end
+[obsRinex, obsRinexType, obsRinexUtcMillis] = processGnssRaw(gnssMeas, filter);
+% Check obsRinexUtcMillis
+[uniqueUtc, iUtcA, ~] = unique(obsRinexUtcMillis);
+[uniqueObs, iObsA, ~] = unique(obsRinex(:, 2));
+assert(length(uniqueUtc) == length(uniqueObs),'obsRinexUtcTimeMillis does not have the same number of epochs as obsRinex');
+assert(all(iObsA == iUtcA), 'Correspondecies in obsRinexUtcTimeMillis do not match tow in obsRinex');
 
 cache = struct();
 cache.obsRinex = obsRinex;

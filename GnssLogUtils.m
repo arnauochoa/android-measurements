@@ -12,7 +12,7 @@ classdef GnssLogUtils < handle
         GPS_BANDNAMES = {'L1' 'L5'};
         GPS_FREQUENCIES = [1575.42e6 1176.45e6];
         GLO_BANDNAMES = {'L1'};
-        BDS_BANDNAMES = {'B1I'}
+        BDS_BANDNAMES = {'C2I'}
         BDS_FREQUENCIES = [1561.098e6];
         GAL_BANDNAMES = {'E1' 'E5a'};
         GAL_FREQUENCIES = [1575.42e6 1176.45e6];
