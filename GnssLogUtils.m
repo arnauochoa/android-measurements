@@ -59,7 +59,7 @@ classdef GnssLogUtils < handle
         % LfL: Loss of Lock Indicator (LLI) for frequency band f
         OBS_TYPES_GPS = 'C1CL1CD1CS1CC5XL5XD5XS5XU1CU1LU1DL1LU5CU5LU5DL5L';
         OBS_TYPES_GLO = 'C1CL1CD1CS1C------------U1CU1LU1DL1L------------';
-        OBS_TYPES_BDS = 'C2IL2ID2IS2I------------U2CU2LU2DL2L------------';
+        OBS_TYPES_BDS = 'C2XL2XD2XS2X------------U2CU2LU2DL2L------------';
         OBS_TYPES_GAL = 'C1XL1XD1XS1XC5XL5XD5XS5XU1CU1LU1DL1LU5CU5LU5DL5L';
        
         % Loss of Lock Indicator Bit

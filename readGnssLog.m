@@ -176,19 +176,20 @@ fclose(magCsvfileID);
 if isempty(line) %line should be -1 at eof
     error('\nError occurred while reading file %s\n',fullLogFilePath)
 end
-if nGnss == 0
+% Delete files when only 1 line -> header
+if nGnss <= 1
     warning('\t%s does not contain GNSS measurements', fullLogFilePath);
     delete(gnssCsvFilePath)
 end
-if nAcc == 0
+if nAcc <= 1
     warning('\t%s does not contain Accelerometer measurements', fullLogFilePath);
     delete(accCsvFilePath)
 end
-if nGyr == 0
+if nGyr <= 1
     warning('\t%s does not contain Gyroscope measurements', fullLogFilePath);
     delete(gyrCsvFilePath)
 end
-if nMag == 0
+if nMag <= 1
     warning('\t%s does not contain Magnetometer measurements', fullLogFilePath);
     delete(magCsvFilePath)
 end
