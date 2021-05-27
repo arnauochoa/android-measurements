@@ -94,7 +94,16 @@ classdef GnssLogUtils < handle
                 case GnssLogUtils.ID_GAL, idObsConst = GnssLogUtils.OBS_ID_GAL;
                 otherwise, idObsConst = -1;
             end
-        end 
+        end
+        
+        function constIds = getIdsObsConstFromStr(constStr)
+            % Transform from constellation letters to constellation id's
+            % used in rinex obs matrix
+            constIds = nan(size(constStr));
+            for iConst = 1:length(constStr)
+                constIds(iConst) = find(strcmp(GnssLogUtils.OBS_CONSTELLATIONS, constStr(iConst)));
+            end
+        end
 
         function svnIndSorted = sortIndices(svnInd, frequencies, idConst)
             % Sort indices to match with desired order (set in GnssLogUtils)
