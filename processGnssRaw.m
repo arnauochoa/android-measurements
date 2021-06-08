@@ -62,30 +62,29 @@ prSeconds = (tRxSysSec - tTxSec);
 % Correct rollover
 [prSeconds, tRxRefNanos] = checkWeekRollover(prSeconds, tRxRefNanos);
 % Pseudorange in meters
-prMeas = prSeconds.* MagnitudeConstants.celerity;
+prMeas = prSeconds .* GnssLogUtils.CELERITY;
 
 %% Compute carrier phase measurements
 % Tranform from meters to cycle units
 carrierMeasCyc = gnssRaw.AccumulatedDeltaRangeMeters .* ...
-                gnssRaw.CarrierFrequencyHz ./ MagnitudeConstants.celerity;
+                gnssRaw.CarrierFrequencyHz ./ GnssLogUtils.CELERITY;
 
 %% Compute Doppler measurements
 doppMeasHz = -gnssRaw.PseudorangeRateMetersPerSecond .* ...
-                gnssRaw.CarrierFrequencyHz ./ MagnitudeConstants.celerity;
+                gnssRaw.CarrierFrequencyHz ./ GnssLogUtils.CELERITY;
 
 %% Compute pseudorange uncertainty
 prSigmaNanos = sqrt(gnssRaw.TimeUncertaintyNanos.^2 + ...
                     gnssRaw.BiasUncertaintyNanos.^2 + ...
                     double(gnssRaw.ReceivedSvTimeUncertaintyNanos).^2);
-prSigmaMeters = prSigmaNanos .* 1e-9 .* MagnitudeConstants.celerity;
+prSigmaMeters = prSigmaNanos .* 1e-9 .* GnssLogUtils.CELERITY;
 
 %% Compute carrier phase uncertainty
 carrierSigmaCyc = gnssRaw.AccumulatedDeltaRangeUncertaintyMeters .* ...
-                gnssRaw.CarrierFrequencyHz ./ MagnitudeConstants.celerity;
-
+                gnssRaw.CarrierFrequencyHz ./ GnssLogUtils.CELERITY;
 %% Compute Doppler uncertainty
 dopplerSigmaHz = gnssRaw.PseudorangeRateUncertaintyMetersPerSecond .* ...
-                gnssRaw.CarrierFrequencyHz ./ MagnitudeConstants.celerity;
+                gnssRaw.CarrierFrequencyHz ./ GnssLogUtils.CELERITY;
 
 %% Compute loss of lock indicator bit
 lliBit = nan(size(carrierMeasCyc));
@@ -98,7 +97,8 @@ lliBit(isAdrCS) = GnssLogUtils.LLI_LOSSLOCK;
 % Half cycle slip/Opposite wavelength factor
 isAdrHCS = gnssRaw.AccumulatedDeltaRangeState == RawMeasFilter.ADR_STATE_HALF_CYCLE_REPORTED;
 % nansum to account for possible combination of CS and HCS, see LLI specs
-lliBit(isAdrHCS) = nansum([lliBit(isAdrHCS) GnssLogUtils.LLI_HALFCYCLE*ones(size(lliBit(isAdrHCS)))], 2); 
+lliBit(isAdrHCS) = nansum([lliBit(isAdrHCS) GnssLogUtils.LLI_HALFCYCLE*ones(size(lliBit(isAdrHCS)))], 2);
+lliBit(isnan(lliBit)) = 0; % Set not known as zeros 
 
 %% Compute signal strength indicator bit (?)
 

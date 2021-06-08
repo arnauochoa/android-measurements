@@ -8,6 +8,8 @@ classdef GnssLogUtils < handle
     
     %% Properties
     properties (Constant)
+        CELERITY = 299792458;
+        
         % Frequency bands
         GPS_BANDNAMES = {'L1' 'L5'};
         GPS_FREQUENCIES = [1575.42e6 1176.45e6];
