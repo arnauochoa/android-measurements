@@ -107,8 +107,8 @@ classdef RawMeasFilter < handle
         end
         function valid = checkGalTime(states)
             % Check time state for GALILEO
-            valid = RawMeasFilter.haveState(states, RawMeasFilter.STATE_TOW_KNOWN); %& ...
-            %    RawMeasFilter.haveState(states, RawMeasFilter.STATE_GAL_E1C_2ND_CODE_LOCK);
+            valid = RawMeasFilter.haveState(states, RawMeasFilter.STATE_TOW_KNOWN) & ...
+               RawMeasFilter.haveState(states, RawMeasFilter.STATE_GAL_E1C_2ND_CODE_LOCK);
         end
         function valid = checkBdsTime(states)
             % Check time state for BEIDOU
