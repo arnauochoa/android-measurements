@@ -6,7 +6,7 @@ LIGHTSPEED = 299792458;
 
 %% Configuration
 % Measurement campaign name
-campaignName = '2020-09-04-US-SF-1'; % '2020-06-05-US-MTV-1'; '2020-08-06-US-MTV-2';
+campaignName = '2021-04-29-US-MTV-1'; % '2020-06-05-US-MTV-1'; '2020-08-06-US-MTV-2';
 % Phone name
 phoneName = 'Pixel4';
 % Filter flag: set to 1 to apply filters to measurements
@@ -14,11 +14,11 @@ filter = 1;
 
 %% Dataset
 % Dataset path
-datasetsPath = './data/training/datasets/';
+datasetsPath = [workspacePath 'data/sdc-data/train/'];
 rawFileName = [phoneName '_GnssLog.txt'];
-derivedFileName = [phoneName '_GnssLog.derived'];
-dirName = [datasetsPath campaignName '/'];
-rinexFilePath = [dirName phoneName '_GnssLog.20o'];
+% derivedFileName = [phoneName '_GnssLog.derived'];
+dirName = [datasetsPath campaignName '/' phoneName filesep];
+% rinexFilePath = [dirName phoneName '_GnssLog.20o'];
 
 global figsPath 
 figsPath = ['./figs/' campaignName '/' phoneName '/'];
@@ -49,56 +49,56 @@ end
 [obs, obsType] = processGnssRaw(gnssRaw, filter);
 
 %% Plot IMU + Mag
-figure; plot(accRaw.utcTimeMillis, [accRaw.UncalAccelXMps2 accRaw.UncalAccelYMps2 accRaw.UncalAccelZMps2], '.'); 
-xlabel('Time (ms)'); ylabel('Acceleration (m/s²)');
-legend('X', 'Y', 'Z'); title('Acc')
-figure; plot(gyrRaw.utcTimeMillis, [gyrRaw.UncalGyroXRadPerSec gyrRaw.UncalGyroYRadPerSec gyrRaw.UncalGyroZRadPerSec], '.'); 
-legend('X', 'Y', 'Z'); title('Gyr')
-xlabel('Time (ms)'); ylabel('Ang. vel. (rad/s)');
-figure; plot(magRaw.utcTimeMillis, [magRaw.UncalMagXMicroT magRaw.UncalMagYMicroT magRaw.UncalMagZMicroT], '.'); 
-legend('X', 'Y', 'Z'); title('Mag')
-xlabel('Time (ms)'); ylabel('Mag. field (uT)');
-
-figure; plot(accRaw.utcTimeMillis-accRaw.utcTimeMillis(1), ~isnan(accRaw.UncalAccelXMps2), '.', 'MarkerSize', 5)
-hold on
-plot(gyrRaw.utcTimeMillis-accRaw.utcTimeMillis(1), 1*(~isnan(gyrRaw.UncalGyroXRadPerSec)), '.', 'MarkerSize', 5)
-plot(magRaw.utcTimeMillis-accRaw.utcTimeMillis(1), 1*(~isnan(magRaw.UncalMagXMicroT)), '.', 'MarkerSize', 5)
-legend('Acc', 'Gyr', 'Mag');
-
-dtAcc = diff(accRaw.utcTimeMillis);
-[~, i] = max(dtAcc); dtAcc(i) = [];
-dtGyr = diff(gyrRaw.utcTimeMillis);
-[~, i] = max(dtGyr); dtGyr(i) = [];
-dtMag = diff(magRaw.utcTimeMillis);
-[~, i] = max(dtMag); dtMag(i) = [];
-
-figure; histogram(dtAcc); xlabel('Acc dt (ms)');
-figure; histogram(dtGyr); xlabel('Gyr dt (ms)');
-figure; histogram(dtGyr); xlabel('Mag dt (ms)');
-
-figure; plot((accRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, ~isnan(accRaw.UncalAccelXMps2), '|', 'MarkerSize', 50,'LineWidth',2)
-hold on
-plot((gyrRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, 1*(~isnan(gyrRaw.UncalGyroXRadPerSec)), '|', 'MarkerSize', 50,'LineWidth',2)
-plot((magRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, 1*(~isnan(magRaw.UncalMagXMicroT)), '|', 'MarkerSize', 50,'LineWidth',2)
-legend('Acc', 'Gyr', 'Mag');
-xlabel('Time from start (ms)')
-grid on;
-
-dtAcc = diff(accRaw.elapsedRealtimeNanos);
-[~, i] = max(dtAcc); dtAcc(i) = [];
-dtGyr = diff(gyrRaw.elapsedRealtimeNanos);
-[~, i] = max(dtGyr); dtGyr(i) = [];
-dtMag = diff(magRaw.elapsedRealtimeNanos);
-[~, i] = max(dtMag); dtMag(i) = [];
-
-figure; histogram(dtAcc); xlabel('Acc chipset dt (ns)');
-figure; histogram(dtGyr); xlabel('Gyr chipset dt (ns)');
-figure; histogram(dtGyr); xlabel('Mag chipset dt (ns)');
+% figure; plot(accRaw.utcTimeMillis, [accRaw.UncalAccelXMps2 accRaw.UncalAccelYMps2 accRaw.UncalAccelZMps2], '.'); 
+% xlabel('Time (ms)'); ylabel('Acceleration (m/s²)');
+% legend('X', 'Y', 'Z'); title('Acc')
+% figure; plot(gyrRaw.utcTimeMillis, [gyrRaw.UncalGyroXRadPerSec gyrRaw.UncalGyroYRadPerSec gyrRaw.UncalGyroZRadPerSec], '.'); 
+% legend('X', 'Y', 'Z'); title('Gyr')
+% xlabel('Time (ms)'); ylabel('Ang. vel. (rad/s)');
+% figure; plot(magRaw.utcTimeMillis, [magRaw.UncalMagXMicroT magRaw.UncalMagYMicroT magRaw.UncalMagZMicroT], '.'); 
+% legend('X', 'Y', 'Z'); title('Mag')
+% xlabel('Time (ms)'); ylabel('Mag. field (uT)');
+% 
+% figure; plot(accRaw.utcTimeMillis-accRaw.utcTimeMillis(1), ~isnan(accRaw.UncalAccelXMps2), '.', 'MarkerSize', 5)
+% hold on
+% plot(gyrRaw.utcTimeMillis-accRaw.utcTimeMillis(1), 1*(~isnan(gyrRaw.UncalGyroXRadPerSec)), '.', 'MarkerSize', 5)
+% plot(magRaw.utcTimeMillis-accRaw.utcTimeMillis(1), 1*(~isnan(magRaw.UncalMagXMicroT)), '.', 'MarkerSize', 5)
+% legend('Acc', 'Gyr', 'Mag');
+% 
+% dtAcc = diff(accRaw.utcTimeMillis);
+% [~, i] = max(dtAcc); dtAcc(i) = [];
+% dtGyr = diff(gyrRaw.utcTimeMillis);
+% [~, i] = max(dtGyr); dtGyr(i) = [];
+% dtMag = diff(magRaw.utcTimeMillis);
+% [~, i] = max(dtMag); dtMag(i) = [];
+% 
+% figure; histogram(dtAcc); xlabel('Acc dt (ms)');
+% figure; histogram(dtGyr); xlabel('Gyr dt (ms)');
+% figure; histogram(dtGyr); xlabel('Mag dt (ms)');
+% 
+% figure; plot((accRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, ~isnan(accRaw.UncalAccelXMps2), '|', 'MarkerSize', 50,'LineWidth',2)
+% hold on
+% plot((gyrRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, 1*(~isnan(gyrRaw.UncalGyroXRadPerSec)), '|', 'MarkerSize', 50,'LineWidth',2)
+% plot((magRaw.elapsedRealtimeNanos-gyrRaw.elapsedRealtimeNanos(1))/1e6, 1*(~isnan(magRaw.UncalMagXMicroT)), '|', 'MarkerSize', 50,'LineWidth',2)
+% legend('Acc', 'Gyr', 'Mag');
+% xlabel('Time from start (ms)')
+% grid on;
+% 
+% dtAcc = diff(accRaw.elapsedRealtimeNanos);
+% [~, i] = max(dtAcc); dtAcc(i) = [];
+% dtGyr = diff(gyrRaw.elapsedRealtimeNanos);
+% [~, i] = max(dtGyr); dtGyr(i) = [];
+% dtMag = diff(magRaw.elapsedRealtimeNanos);
+% [~, i] = max(dtMag); dtMag(i) = [];
+% 
+% figure; histogram(dtAcc); xlabel('Acc chipset dt (ns)');
+% figure; histogram(dtGyr); xlabel('Gyr chipset dt (ns)');
+% figure; histogram(dtGyr); xlabel('Mag chipset dt (ns)');
 
 
 
 %% Filter
-return
+% return
 if ~filter
     isInvalid = obs(:, GnssLogUtils.COL_C1) > 50e6 | ...
                 obs(:, GnssLogUtils.COL_C1) < -5e6 | ...
@@ -114,9 +114,9 @@ isGalIdx = obs(:, 3) == GnssLogUtils.OBS_ID_GAL;
 isBdsIdx = obs(:, 3) == GnssLogUtils.OBS_ID_BDS;
 
 %% Plots from RINEX
-indRnxGps = obs_rinex(:, 3) == GnssLogUtils.OBS_ID_GPS;
-indRnxBds = obs_rinex(:, 3) == GnssLogUtils.OBS_ID_BDS;
-indRnxGal = obs_rinex(:, 3) == GnssLogUtils.OBS_ID_GAL;
+% indRnxGps = obs_rinex(:, 3) == GnssLogUtils.OBS_ID_GPS;
+% indRnxBds = obs_rinex(:, 3) == GnssLogUtils.OBS_ID_BDS;
+% indRnxGal = obs_rinex(:, 3) == GnssLogUtils.OBS_ID_GAL;
 
 % constCount = [];
 % for iRow = 1:size(obs_rinex)
